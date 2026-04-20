@@ -1,0 +1,38 @@
+name: 매일 인허가정보 추출 및 메일 전송
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 매일 UTC 00:00 = 한국시간 오전 9시
+  workflow_dispatch:        # 수동 실행 버튼도 활성화
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 저장소 체크아웃
+        uses: actions/checkout@v3
+
+      - name: Python 설치
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 패키지 설치
+        run: pip install -r requirements.txt
+
+      - name: 데이터 추출 실행
+        run: python localdata_api_필터링.py
+
+      - name: Gmail로 결과 전송
+        env:
+          GMAIL_USER:     ${{ secrets.GMAIL_USER }}
+          GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
+          GMAIL_TO:       ${{ secrets.GMAIL_TO }}
+        run: |
+          FILE=$(ls 신규가맹점_*.xlsx 2>/dev/null | head -1)
+          if [ -n "$FILE" ]; then
+            python send_email.py "$FILE"
+          else
+            echo "엑셀 파일 없음 - 수집된 데이터가 없습니다"
+          fi
