@@ -30,7 +30,7 @@ jobs:
           GMAIL_PASSWORD: ${{ secrets.GMAIL_PASSWORD }}
           GMAIL_TO:       ${{ secrets.GMAIL_TO }}
         run: |
-          FILE=$(ls 신규가맹점_*.xlsx 2>/dev/null | head -1)
+         FILE=$(ls 검단구_신규가맹점_*.xlsx 2>/dev/null | head -1)
           if [ -n "$FILE" ]; then
             python send_email.py "$FILE"
           else
